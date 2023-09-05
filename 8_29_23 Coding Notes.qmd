@@ -1,0 +1,104 @@
+---
+title: "8_29_23 Coding Notes"
+author: "Dan Schumacher"
+format: html
+editor: source
+---
+
+We begin by installing `tidyverse`.
+
+```{r}
+#|  eval: false
+# ^ This makes it so you don't re install tidyverse everytime
+install.packages('tidyverse')
+```
+
+Load tidyverse
+
+```{r}
+library(tidyverse)
+```
+
+## dataframes
+
+R is strong bc dataframes are native to r (not like how pandas isn't native to python, new package called polars)
+
+`mpg` is a dataframe from 'ggplot2' packages
+
+This doesn't look that good
+
+```{r}
+print(mpg)
+```
+
+```{r}
+head(mpg)
+```
+
+What is a data frame? A collection of items (in r they called vectors, these are collums) they must have the same length! the objects have to be same type <int>, <chr> etc. We use NA (not Null or .)
+
+Useful metadata functions
+
+```{r}
+dim(mpg)
+nrow(mpg)
+ncol(mpg)
+colnames(mpg)
+class(mpg)
+```
+
+TBL vs. DFs
+
+```{r}
+mpg_df = as.data.frame(mpg)
+class(mpg_df)
+```
+
+tbl by default only prints 10 rows. also tbl shows data types.
+
+## Subsetting a dataframe
+
+`select()` for columns
+
+-   outputs the same type of data as input
+-   number rows stays the same
+-   plays nice with other functions
+    -   `Starts_with()`
+    -   `ends_with()`
+    -   `contains()`
+
+```{r}
+select(.data = mpg, year)
+```
+
+```{r}
+select(mpg, starts_with('c'))
+```
+
+```{r}
+select(mpg, ends_with('y'))
+```
+
+```{r}
+select(mpg, contains('e'))
+```
+
+### filtering rows
+
+`filter()` for rows
+
+```{r}
+filter(.data = mpg, year == 2008)
+```
+
+can use multiple conditions as well the ***','*** means AND so better to write & explicitly.
+
+```{r}
+filter(mpg, year == 2008 , manufacturer == 'audi')
+```
+
+`slice()` lets you filter rows by index (inclusive)
+
+```{r}
+slice(.data = mpg, 10:15)
+```
