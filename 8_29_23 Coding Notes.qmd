@@ -102,3 +102,7 @@ filter(mpg, year == 2008 , manufacturer == 'audi')
 ```{r}
 slice(.data = mpg, 10:15)
 ```
+
+```{r}
+dt = readr::read_csv('svcckww1jskrstnz_csv.zip')
+```
