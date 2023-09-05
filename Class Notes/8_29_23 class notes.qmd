@@ -1,0 +1,47 @@
+---
+title: "8_29_23 class notes"
+author: "Dan Schumacher"
+format: html
+editor: source
+---
+
+This \^ is yaml (yet another markdown language)
+
+change format to docx, or pdf if you want a different output after render.
+
+General Notes ---------------------------------------------------------------------------------------------------------------------
+
+if a doc can be opened without unzip, do that it saves memory don't open CSV files in Excel. It will mess up the file! especially the date file can get messed up
+
+IDE is a shell that provides additional functionality (integrated developer environment)
+
+Console is where you interact with R Terminal interacts with your machine \
+Bottom right window has lots of tabs
+
+file explorer
+
+Help tab packages plots presentation
+
+Top right has lots of tabs
+
+environment (tells you what is active in session)
+
+git history of commands run posit IDE (R studio) we will be using quarto documents
+
+what is my working directory?
+
+```{r}
+getwd()
+```
+
+you can type ctrl-alt-i to make a new code block
+
+`#| echo:` false makes hides the *code* that you write but keeps the *input*.
+
+```{r}
+#| echo: false
+getwd() 
+```
+
+```{r}
+```
