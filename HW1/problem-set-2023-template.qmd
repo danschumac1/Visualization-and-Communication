@@ -1,0 +1,141 @@
+---
+title: "Homework 1"
+author: "YOUR NAME and abc123"
+format: html
+---
+
+```{r setup}
+library(tidyverse)
+```
+
+This homework uses `tech_stocks_csv.zip` which we used in the week 3 class. 
+
+Read `tech_stocks_csv.zip` into your R session using `read_csv()` function from `readr` package. Store the resulting object in `d1`.
+
+```{r}
+d1 = read_csv()
+```
+
+
+<p style="border:3px; border-style:solid; border-color:#b50000; padding: 1em;">This homework consists of 8 questions. Q1 carries 1 point. Q2 through Q8 carry two points each. We use `d2` as the initial input. Your objective is to reproduce the output shown in the PDF file for Q1 through Q8. </p>
+
+
+# Q1
+
+Print a data frame with the medians of `at`, `emp`, and `xrd`. 
+
+`at` is Total assets (USD million)
+`emp` is Number of employees (In thousands)
+`xrd` is R&D expenses (USD million)
+
+```{r}
+
+```
+
+# Q2
+
+Print a data frame with the means of `sale`, `oibdp`, and `xrd` for Apple, Meta, and Tesla. For this, you will need to follow these steps:
+
+1. Filter only the observations pertaining to Apple, Meta, and Tesla
+2. Group by `conm`
+3. Summarize `sale`, `oibdp`, and `xrd` to get their means
+4. Output it as a data frame by using `as.data.frame()` function.
+
+In Step 3, you may **optionally** use `across()` inside `summarize()`. This function will save you writing more code. Read more about it here: https://dplyr.tidyverse.org/reference/across.html
+
+```{r}
+
+```
+
+# Q3
+
+Round all the numeric variables in the above data frame to 1 decimal place. Output as a data frame using `as.data.frame()` function.
+
+For rounding, you will have to use `mutate`, `across`, and `where` functions from `dplyr` package. Check https://www.tidyverse.org/blog/2020/04/dplyr-1-0-0-colwise/ for more information.
+
+```{r}
+
+```
+
+# Q4
+
+Many advertising values are missing. The missing code in R is `NA`. We can get the total number of missing values for advertising quite easily by running the following function:
+
+```{r}
+sum(is.na(d1$xad))
+```
+
+In the finance literature, a common (but incorrect) practice is to assume that the missing advertising is 0. We will use this adjustment to `xad` and create a new variable `adv` and save it in a new object `d2`.
+
+The first six values of `d2` when `xad` is NA are as follows:
+
+```{r}
+
+```
+
+
+
+# Q5
+
+Using `d2`, create the following variables and print first 8 rows for NVidia and the new columns along with `conm` and `datadate`:
+
+1. Return on assets (`roa`) = `oibdp` / `at`
+2. Free cash flow (`fcf`) = `oancf` / `che`
+3. Strategic emphasis (`strat_emph`) = (`adv` - `xrd`) / `at`
+
+```{r}
+
+```
+
+# Q6
+
+You want to know how many profitable years each of the sample company experienced. For this, follow these steps:
+
+1. Create an indicator variable (dummy variable) called `profit_ind` such that when `oibdp > 0` this variable is 1. Otherwise it is 0.
+2. Group by company names
+3. Summarize `profit_ind` by taking its sum. Also, get the total number of observations for each company.
+
+```{r}
+
+```
+
+# Q7
+
+Find the average annual stock returns of all the companies. Follow these steps:
+
+1. Arrange the data set by `conm` and `datadate`.
+2. Group by `conm`
+3. Calculate stock return `stk_ret` by taking the difference between `mkvalt` (Market value of equity) and its lag and then divide the difference by the lag of `mkvalt`
+4. Calculate stock return `stk_ret2` by taking the difference between `prcc_f` (Stock price at the end of the fiscal year) and its lag and then divide the difference by the lag of `prcc_f` 
+4. Summarize to get the mean of the stock returns `stk_ret_mean` and `stk_ret2_mean`.
+5. Display the average stock returns in percentage format.
+
+```{r}
+
+```
+
+Not graded: The average stock returns calculated using these two measures are very different. Which of these is correct?
+
+# Q8
+
+In many statistical and machine learning applications, we use scaled variables instead of the original variables. A scaled variable is typically created by subtracting the sample mean of the variable from the variable and dividing it by its standard deviation. There is a `scale()` function in base R which can directly do it. 
+
+You want to create a scaled variable for `sale` but separately for each company. Therefore, you can't use the mean and standard deviation of `sale` for the entire sample. Instead, you have to calculate these statistics for each company separately and then create a scaled variable. Follow these steps:
+
+1. Group by `conm`
+2. Summarize `sale` to get the mean (`sale_mean`) and the standard deviation (`sale_sd`)
+3. Assign this dataframe to `d2_sum`
+4. Join `d2` and `d2_sum` by `conm`
+5. Create `sale_scaled` by subtracting `sale_mean` from `sale` and dividing this difference by `sale_sd`
+
+Print the first 10 rows for Tesla with `conm`, `sale`, `sale_scaled`, `sale_mean`, and `sale_sd` using `as.data.frame()`
+
+```{r}
+
+  
+```
+
+
+
+
+
