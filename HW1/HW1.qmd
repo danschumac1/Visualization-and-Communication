@@ -202,12 +202,11 @@ d2 %>%
 # Summarize to get the mean of the stock returns stk_ret_mean and stk_ret2_mean.
 
   summarize(
-    stk_ret_mean = mean(stk_ret, na.rm = T),
-    stk_ret_mean2 = mean(stk_ret2, na.rm = T)
+    stk_ret_mean = percent(mean(stk_ret, na.rm = T), 2),
+    stk_ret_mean2 = percent(mean(stk_ret2, na.rm = T), 2)
   ) 
   
   
-HOW TO GET IT INTO PERCENTS!!!!!!
 
 # Display the average stock returns in percentage format.
 ```
