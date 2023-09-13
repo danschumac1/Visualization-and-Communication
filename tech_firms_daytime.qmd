@@ -1,0 +1,333 @@
+---
+title: "Data wrangling with `tidyverse`"
+format: html
+---
+
+**Important**
+
+If you haven't installed `tidyverse` package before, do this:
+
+Install `tidyverse` package by running the following command in the console. This needs to be done only once so make sure that you don't run it from your Rmarkdown code chunk.
+
+install.packages("tidyverse")
+
+Once the installation is complete, load the library
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+```
+
+We will also use a utility library called `here` which helps us locating files in the project folder. Locating files is not an issue when your project directory has no subdirectories. However, that's unlikely. For example, in my case, I stored the data files in a subdirectory called "Data". `here` package makes it easy to reference that subdirectory and the dataset stored within.
+
+Install `here` package by running `install.packages("here")` from your console. 
+
+
+## Data manipulation
+
+
+Read the zipped CSV file. Note how I have labeled the code chunk as "data-read". This way I can later easily reference the code chunk if required.
+
+```{r data-read}
+
+dt = read_csv(here::here("Data", "tech_stocks_csv.zip"),
+              show_col_types = FALSE) # I add this argument to silent the output
+
+```
+
+### Frequency distribution 
+
+```{r}
+count(dt, fyear)
+```
+
+```{r}
+count(dt, conm)
+```
+```{r}
+count(dt, fyear, conm)
+```
+
+```{r}
+select(
+  filter(dt, fyear == 2009 | fyear == 2023),
+  fyear, conm
+)
+```
+
+
+### Select columns
+
+Use `select()` function from `dplyr` package to select columns
+
+In the following example, we will select a handful of columns and then save the resulting dataframe into `dt1`
+
+```{r}
+dt1 = dplyr::select(.data = dt, conm, fyear, sale)
+```
+
+Print dt1
+```{r}
+dt1
+```
+
+
+### Creating a new variable
+
+`mutate()` function from `dplyr` allows you to create new variables
+
+The variable `sale` is in million USD. Let's create a new variable `sale_bil` which stores sales in billion USD.
+
+```{r}
+mutate(dt1, 
+       sale_bil = round(sale / 1000, 0)
+       )
+```
+
+Create multiple variables
+
+```{r}
+mutate(dt1,
+       sale_bil = sale / 1000,
+       sale_sq = round(sale_bil^2, 2), # Create square of sales and round it to 2 decimals
+       log_sale = log(sale))
+```
+
+### Summarize data
+
+`summarize()` function from `dplyr` helps in getting summaries as a dataframe.
+
+Use `dt` to get averages of sales, total assets, profits, and advertising
+
+```{r}
+
+  summary(dt1)
+
+```
+
+
+```{r}
+
+summarize(dt,
+          sale_mean = mean(sale),
+          at_mean = mean(at),
+          oibdp_mean = mean(oibdp),
+          xad_mean = mean(xad))
+
+```
+
+```{r}
+select(dt, xad)
+```
+
+
+
+We get a missing value in return for `xad_mean`. This is because by default `mean()` requires non-missing values. We can remove the `NA` from `xad` before taking the mean by using `na.rm` argument inside `mean()`
+
+```{r}
+
+summarize(dt,
+          sale_mean = mean(sale),
+          at_mean = mean(at),
+          oibdp_mean = mean(oibdp),
+          xad_mean = mean(xad, na.rm = TRUE))
+
+```
+
+
+
+### Summaries by groups.
+
+Next, We want to find the averages of the above variables for each company separately. For this we can use `group_by()` function from `dplyr`
+
+
+```{r}
+summarize(
+  group_by(dt, conm), # Note how I used group_by
+  sale_mean = mean(sale),
+  at_mean = mean(at),
+  oibdp_mean = mean(oibdp),
+  xad_mean = mean(xad, na.rm = TRUE)
+  )
+```
+
+## Pipes
+
+This is where I would like to introduce the concept of pipes. Consider two steps to create a subset of `dt`. 
+
+```{r}
+dt1 = select(dt, conm, fyear, sale)
+dt2 = filter(dt1, sale > 100000)
+
+
+```
+
+These two steps can be combined into one step. Can you think of any reasons for why this is useful?
+
+```{r}
+dt1 = dt %>% select(.data = ., conm, fyear, sale)
+```
+
+```{r}
+dt1 = dt %>% select(conm, fyear, sale)
+```
+
+
+
+```{r}
+c("A", "B", "C") |> select(conm, fyear, sale)
+```
+
+
+```{r}
+summary(lm(formula = sale ~ at + cogs, data = dt))
+```
+
+```{r}
+dt %>% 
+  lm(sale ~ at + cogs) %>% 
+  summary()
+```
+
+
+From https://www.techopedia.com/definition/3410/pipe
+
+*A pipe is a method used to pass information from one program process to another. Unlike other types of interprocess communication, a pipe only offers one-way communication by passing a parameter or output from one process to another. The information that is passed through the pipe is held by the system until it can be read by the receiving process. Pipes are primarily used in programming on Unix systems.*
+
+We will use `%>%` to pipe output data from one `tidyverse` function to the next.
+This pipe originates from `magrittr` package. Read more about it here: https://magrittr.tidyverse.org/reference/pipe.html
+
+The keyboard shortcut is 
+
+
+Shift + Command + M (Mac)
+Shift + Control + M (Windows)
+
+As an example, we will select a few variables and then pass them on to summarize using a pipe
+
+```{r}
+dt %>% 
+  select(.data = ., 
+         conm, fyear, sale, at, oibdp, xad) %>% 
+  summarize(.data = .,
+            sale_mean = mean(sale),
+            at_mean = mean(at),
+            oibdp_mean = mean(oibdp),
+            xad_mean = mean(xad, na.rm = TRUE))
+```
+
+Can you create grouped means for each company?
+
+
+```{r}
+dt %>% 
+  select(.data = ., 
+         conm, fyear, sale, at, oibdp, xad) %>% 
+  group_by(.data = ., conm) %>% 
+  summarize(.data = .,
+            sale_mean = mean(sale),
+            at_mean = mean(at),
+            oibdp_mean = mean(oibdp),
+            xad_mean = mean(xad, na.rm = TRUE))
+```
+
+
+```{r}
+dt %>% 
+  select(conm, fyear, sale, at, oibdp, xad) %>% 
+  group_by(conm) %>% 
+  summarize(sale_mean = mean(sale),
+            at_mean = mean(at),
+            oibdp_mean = mean(oibdp),
+            xad_mean = mean(xad, na.rm = TRUE))
+```
+
+```{r}
+dt %>% 
+  select(conm, fyear, sale, at, oibdp, xad) %>% 
+  group_by(conm) %>% 
+  summarize(across(
+    c(sale, at, oibdp, xad), \(x) mean(x, na.rm = TRUE)
+    )
+    )
+```
+
+
+### Joining dataframes
+
+`dplyr` provides several `_join` functions inspired by SQL.
+
+```{r echo=FALSE}
+knitr::include_graphics("joins.png")
+```
+
+
+
+We will create summary of sales by fyear and join it to dt1
+
+
+```{r}
+dt1_summary = dt1 %>% 
+  group_by(fyear) %>% 
+  summarize(sale_mean = mean(sale))
+```
+
+```{r}
+dt1_summary
+```
+
+
+```{r}
+dt1_summary_filtered = dt1_summary %>% 
+  filter(fyear > 2009 & fyear < 2023)
+```
+
+
+```{r}
+dt2 = inner_join(dt1, dt1_summary, by = "fyear")
+```
+
+```{r}
+dt2
+```
+
+
+```{r}
+dt3 = left_join(dt1, dt1_summary_filtered, by = c("fyear"))
+```
+
+
+```{r}
+dt3 
+```
+
+
+```{r}
+dt1 %>% 
+  group_by(fyear) %>% 
+  mutate(sale_mean = mean(sale),
+         sale_ratio = scales::percent(sale / sale_mean, accuracy = 0.01),
+         sale = scales::dollar(sale),
+         sale_mean = scales::dollar(sale_mean))
+```
+
+
+```{r}
+dt4 = dt %>% 
+  select(conm, fyear, sale, at, xrd)
+```
+
+```{r}
+dt4
+
+```
+
+
+```{r}
+dt4 %>% 
+  pivot_longer(cols = c(sale, at, xrd),
+               names_to = "metric_name",
+               values_to = "metric_value")
+```
+

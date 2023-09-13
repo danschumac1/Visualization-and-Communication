@@ -19,7 +19,7 @@ Read `tech_stocks_csv.zip` into your R session using `read_csv()` function f
 
 ```{r}
 #| echo: False
-setwd("C:/Users/dansc/Documents/Gradschool/Visualization and Communication/data/tech_stocks_csv.zip")
+setwd("C:/Users/dansc/Documents/Gradschool/Visualization and Communication/data/")
 
 d1 <- read_csv('tech_stocks.csv')
 ```
@@ -91,7 +91,8 @@ d1means %>%
     across(
       where(is.numeric), 
       round, 1)
-    )
+    ) %>% 
+  as.data.frame()
 ```
 
 ## Q4
@@ -111,7 +112,6 @@ d2 <- d1 %>%
 
 # we should have 0 NAs now let's check
 sum(is.na(d2$adv))
-
 ```
 
 ## Q5
@@ -165,8 +165,8 @@ d2 %>%
   group_by(conm) %>% 
   summarise(
      profit_years  = sum(profit_ind),
-     # I found this answer on S.O.
-     # why doesn't ty = count(profit_ind) work?
+     # I found this answer on Stack Overflow.
+     # why doesn't total_years = count(profit_ind) work?
      total_years = n(), .groups = 'drop')
   
 ```
@@ -209,7 +209,7 @@ d2 %>%
 
 Not graded: The average stock returns calculated using these two measures are very different. Which of these is correct?
 
-1.  My guess is stk_ret (not stk_ret2) because stk_ret2 is yearly whereas stk_ret is on a more regular interval.
+1.  My guess is stk_ret because stk_ret2 is yearly whereas stk_ret is on a more regular interval.
 
 ## Q8
 
@@ -247,7 +247,7 @@ left_join(d2, d2_sum, by = 'conm') %>%
   
   filter(conm == 'TESLA INC') %>% 
   
-  select(conm, sale, sale_scaled, sale_mean, sale_sd) %>% 
+  select(conm, sale, sale_scaled) %>% 
   
   as.data.frame() %>% 
   head(10)

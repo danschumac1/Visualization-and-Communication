@@ -203,7 +203,8 @@ date   (5): datadate, apdedate, fdate, pdate, ipodate
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">where</span>(is.numeric), </span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>      round, <span class="dv">1</span>)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: There was 1 warning in `mutate()`.
 ℹ In argument: `across(where(is.numeric), round, 1)`.
@@ -320,8 +321,8 @@ Supply arguments directly to `.fns` through an anonymous function instead.
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(conm) <span class="sc">%&gt;%</span> </span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
 <span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">profit_years  =</span> <span class="fu">sum</span>(profit_ind),</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>     <span class="co"># I found this answer on S.O.</span></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>     <span class="co"># why doesn't ty = count(profit_ind) work?</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>     <span class="co"># I found this answer on Stack Overflow.</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>     <span class="co"># why doesn't total_years = count(profit_ind) work?</span></span>
 <span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">total_years =</span> <span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">'drop'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 7 × 3
@@ -382,7 +383,7 @@ Supply arguments directly to `.fns` through an anonymous function instead.
 </div>
 <p>Not graded: The average stock returns calculated using these two measures are very different. Which of these is correct?</p>
 <ol type="1">
-<li>My guess is stk_ret (not stk_ret2) because stk_ret2 is yearly whereas stk_ret is on a more regular interval.</li>
+<li>My guess is stk_ret because stk_ret2 is yearly whereas stk_ret is on a more regular interval.</li>
 </ol>
 </section>
 <section id="q8" class="level2">
@@ -426,22 +427,22 @@ Supply arguments directly to `.fns` through an anonymous function instead.
 <span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(conm <span class="sc">==</span> <span class="st">'TESLA INC'</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(conm, sale, sale_scaled, sale_mean, sale_sd) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(conm, sale, sale_scaled) <span class="sc">%&gt;%</span> </span>
 <span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> </span>
 <span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>        conm      sale sale_scaled sale_mean  sale_sd
-1  TESLA INC   116.744  -0.7477853  18585.48 24697.92
-2  TESLA INC   204.242  -0.7442426  18585.48 24697.92
-3  TESLA INC   413.256  -0.7357798  18585.48 24697.92
-4  TESLA INC  2013.496  -0.6709872  18585.48 24697.92
-5  TESLA INC  3198.356  -0.6230132  18585.48 24697.92
-6  TESLA INC  4046.025  -0.5886917  18585.48 24697.92
-7  TESLA INC  7000.132  -0.4690821  18585.48 24697.92
-8  TESLA INC 11758.751  -0.2764092  18585.48 24697.92
-9  TESLA INC 21461.268   0.1164384  18585.48 24697.92
-10 TESLA INC 24578.000   0.2426325  18585.48 24697.92</code></pre>
+<pre><code>        conm      sale sale_scaled
+1  TESLA INC   116.744  -0.7477853
+2  TESLA INC   204.242  -0.7442426
+3  TESLA INC   413.256  -0.7357798
+4  TESLA INC  2013.496  -0.6709872
+5  TESLA INC  3198.356  -0.6230132
+6  TESLA INC  4046.025  -0.5886917
+7  TESLA INC  7000.132  -0.4690821
+8  TESLA INC 11758.751  -0.2764092
+9  TESLA INC 21461.268   0.1164384
+10 TESLA INC 24578.000   0.2426325</code></pre>
 </div>
 </div>
 </section>
