@@ -1,0 +1,67 @@
+---
+title: "Changing font"
+author: "Ashwin Malshe"
+date: "2023-09-26"
+output: html_document
+---
+
+For using any fonts outside the fonts installed on your system, I strongly recommend using `showtext` package.
+
+Install is by running this code in the console:
+
+install.packages("showtext")
+
+```{r}
+#| label = "setup",
+#| include = FALSE
+
+library(ggplot2)
+library(showtext)
+```
+
+Get the font you like either from Google Fonts or from a `.ttf` or `.otf` file.
+
+I am importing this cool font: https://fonts.google.com/specimen/Monoton
+
+The `family` argument below is a name that I choose to give to this font to be used in this session. You can use any name you want.
+
+```{r}
+font_add_google(name = "Monoton", family = "Monoton", db_cache = FALSE)
+
+```
+
+Before we create a plot, we need to start showtext:
+
+```{r}
+showtext_auto()
+```
+
+Now we are ready to create a plot
+
+```{r}
+#| message = FALSE
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "A plot using Monoton") +
+  theme(plot.title = element_text(family = "Monoton", color = "blue", hjust = 0.5))
+
+```
+
+## Reading a local font file
+
+```{r}
+font_add(family = "retina", regular = "Retina-Light.otf")
+```
+
+```{r}
+#| message = FALSE
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  labs(title = "A plot using Monoton", 
+       subtitle = "With a subtitle using Retina Light") +
+  theme(plot.title = element_text(family = "Monoton"),
+        plot.subtitle = element_text(family = "retina"))
+
+```

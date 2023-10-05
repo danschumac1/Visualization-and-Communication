@@ -1,0 +1,304 @@
+---
+title: "Scales, Axes, and Legends"
+author: "Ashwin Malshe"
+date: "26 September 2023"
+output: html_document
+---
+
+```{r}
+#| label = "setup",
+#| include = FALSE
+library(dplyr)
+library(ggplot2)
+
+theme_set(theme_minimal())
+```
+
+# Basics of scales
+
+```{r}
+sapply(mpg, class)
+```
+
+
+When you plot this:
+
+```{r}
+ggplot(mpg, aes(displ, hwy)) + 
+  geom_point(aes(color = class))
+
+```
+
+This is what ggplot2 is actually plotting: 
+
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(aes(color = class)) +
+  scale_x_continuous() +
+  scale_y_continuous() +
+  scale_color_discrete()
+```
+
+*You can change the scales if you want. For example, you can drop the X axis label by writing NULL inside the parenthesis linked to scale_x_continuous*
+
+
+## Change axis and legend titles
+
+```{r}
+ggplot(mpg,aes(displ, hwy, color = class)) +
+  geom_point()
+```
+
+```{r}
+ggplot(mpg,aes(displ, hwy, color = class)) +
+  geom_point() +
+  scale_x_continuous("Displacement") +
+  scale_y_continuous("Highway Miles")
+```
+
+Change the legend title
+
+```{r}
+ggplot(mpg,aes(displ,hwy, color = class)) +
+  geom_point() +
+  scale_x_continuous("Displacement") +
+  scale_y_continuous("Highway Miles") +
+  scale_color_discrete("Vehicle Class")
+```
+
+Multiline legend title
+```{r}
+ggplot(mpg,aes(displ, hwy, color = class)) +
+  geom_point() +
+  scale_x_continuous("Displacement") +
+  scale_y_continuous("Highway Miles") +
+  scale_color_discrete("Vehicle\nClass")
+```
+
+One wrapper to rule them all (We have seen this in the last class)
+
+```{r}
+ggplot(mpg,aes(displ,hwy, color = class)) +
+  geom_point() +
+  labs(x = "Displacement", y = "Highway Miles", color = "Vehicle\nClass")
+```
+
+As a reminder, `labs` also allows you to add plot title, subtitle, and caption
+
+
+## Ticks and breaks
+
+```{r}
+ggplot(mpg, aes(displ, hwy, color = class)) +
+  geom_point() +
+  scale_x_continuous(breaks = 2:7, limits = c(-5, 10))
+```
+
+
+```{r}
+ggplot(mpg, aes(displ, hwy, color = class)) +
+  geom_point() +
+  scale_x_continuous(breaks = c(1.5, 2.5, 3.5, 4.5, 5.5, 6.5),
+                     labels = c("1.5 lit.", "α", "C", "D", "E", "F"))
+```
+
+Change the legend key labels
+
+```{r}
+ggplot(mpg,aes(displ,hwy, color = class)) +
+  geom_point() +
+  scale_color_discrete(labels = c("1", "Compact", "3", "4", "5", "6", "7")) +
+  scale_x_continuous(limits = c(0, 7),
+                     breaks = c(0:7))
+```
+
+Remove the titles and labels from legends and additionally breaks from axes
+
+```{r}
+ggplot(mpg,aes(displ,hwy, color = class)) +
+  geom_point() +
+  scale_x_continuous(name = NULL, breaks = NULL, labels = NULL) +
+  scale_y_continuous(name = NULL, breaks = NULL, labels = NULL) +
+  scale_color_discrete(name = NULL, labels = NULL)
+```
+
+## Using scales package to change number formatting on axes and legends
+
+For this example, we will use `diamonds` data set that comes bundled with `ggplot2`. As the data set has more than 55,000 rows, it is easier to work with a random sample of only a few observations. Here we will use a sample of 100 rows/observations.
+
+```{r}
+set.seed(123456) # ensures reproducibility of the sample
+d1 <- diamonds %>% slice(sample(nrow(diamonds), 100))
+
+ggplot(d1, aes(clarity, price)) +
+  geom_point(alpha = 1/2)
+```
+
+The y axis has prices, which may need two tweaks. First, there is no comma separating
+thousands. Second, we may want to show units ($).
+
+```{r}
+ggplot(d1, aes(clarity,price)) +
+  geom_point(alpha = 1/2) +
+  scale_y_continuous(labels = scales::label_comma())
+```
+
+Add $ sign before the price. You can change it to another currency such as a € sign. 
+_(On the Mac keyboard, the shortcut for getting a Euro sign is Shift + Option + 2.)_
+
+```{r}
+ggplot(d1, aes(clarity, price)) +
+  geom_point(alpha = 1/2) +
+  scale_y_continuous(labels = scales::label_dollar(prefix = "$"))
+```
+
+## Legends
+
+```{r}
+mydata <- data.frame(p = 1:3, 
+                     q = 1:3, 
+                     r = c("a","b","c"))
+
+ggplot(mydata, aes(p, q)) +
+  geom_point(aes(color = r))
+```
+
+The easiest way to turn the legends on and off is by setting `show.legend` to `FALSE`
+
+```{r}
+ggplot(mydata, aes(p, q)) +
+  geom_point(aes(size = p)) +
+  geom_point(aes(color = r), show.legend = F)
+
+ggplot(mydata, aes(p, q)) +
+  geom_point(aes(size = p)) +
+  geom_point(aes(color = r), show.legend = T)
+```
+
+## Controlling legend position using theme(). 
+
+```{r}
+ggplot(mydata, aes(p,q)) +
+  geom_point(aes(color = r), size = 4) +
+  labs(title = "Legends at the top") +
+  
+  #theme is complex there are 40 args.
+  theme(legend.position = "top") 
+```
+
+```{r}
+ggplot(mydata, aes(p,q)) +
+  geom_point(aes(color = r), size = 4) +
+  labs(title = "Legends at the bottom") +
+  theme(legend.position = "bottom")
+```
+
+```{r}
+ggplot(mydata, aes(p,q)) +
+  geom_point(aes(color = r), size = 4) +
+  labs(title = "Legends on left") +
+  theme(legend.position = "left")
+```
+
+```{r}
+ggplot(mydata, aes(p,q)) +
+  geom_point(aes(color = r), size = 4) +
+  labs(title = "No legends") +
+  #kills it!
+  theme(legend.position = "none")
+```
+
+
+You can bring the legends inside the plot as well.
+
+```{r}
+ggplot(mydata, aes(p,q)) +
+  geom_point(aes(color = r), size = 4) +
+  theme(legend.position = c(1, 0.5))
+```
+```{r}
+ggplot(mydata, aes(p,q)) +
+  geom_point(aes(color = r), size = 4) +
+  theme(legend.position = c(.5, 0.5))
+```
+
+You can also change the direction in which legends are laid out
+
+```{r}
+ggplot(mydata, aes(p, q)) +
+  geom_point(aes(color = r), size = 4) +
+  theme(legend.direction = "horizontal")
+
+```
+
+
+
+Practice the code below on your own
+
+## Guides
+Guides are the legend keys. They are shown in a table and therefore you can alter the table rows and columns.
+ 
+ 
+```{r}
+ggplot(d1, aes(carat, price)) +
+  geom_point(aes(color = clarity)) +
+  guides(color = guide_legend(ncol = 3))
+```
+
+The default for filling up the guides is by column. You can also fill them by row.
+
+```{r}
+ggplot(d1, aes(carat, price)) +
+  geom_point(aes(color = clarity)) +
+  guides(color = guide_legend(ncol = 3, byrow = TRUE))
+```
+
+Reverse the ordering of legend keys. Note that this reverses simply the order in which the keys are displayed and not the actual scaling. For example, IF has color pink in both the cases. The reversal simply displays IF first instead of last in the legend.
+
+```{r}
+ggplot(d1, aes(carat, price)) +
+  geom_point(aes(color = clarity)) +
+  guides(color = guide_legend(ncol = 3, byrow = TRUE, reverse = TRUE))
+```
+
+Finally, what if you want to override the aesthetics in any geom and display legends with its own aes. This is useful when we have cases where we used a small alpha to reduce overplotting but we want the legend to have darker colors.
+
+```{r}
+ggplot(d1, aes(carat, price)) +
+  geom_point(aes(color = clarity), alpha = 0.4)
+```
+
+We can override this alpha in guides
+
+```{r}
+ggplot(d1, aes(carat, price)) +
+  geom_point(aes(color = clarity), alpha = 0.4) +
+  guides(color = guide_legend(override.aes = list(alpha = 1)))
+```
+
+Similar to guide_legend, another function guide_colorbar controls the behavior of the guide when we are using a continuous variable. 
+
+```{r}
+mydata2 <- data.frame(a = 1:3, b = 1:3, c = 1:3)
+ggplot(mydata2, aes(a,b)) +
+  geom_point(aes(color = c))
+
+```
+
+You can use similar options in guide_colorbar too
+
+```{r}
+ggplot(mydata2, aes(a,b)) +
+  geom_point(aes(color = c)) +
+  guides(color = guide_colorbar(reverse = T))
+```
+
+What happens when you use guide_legend on a continuous variable?
+
+```{r}
+ggplot(mydata2, aes(a,b)) +
+  geom_point(aes(color = c)) +
+  guides(color = guide_legend())
+```
+
+Now if you apply the same logic and use guide_colorbar for a discrete variable will it work? Why or why not?

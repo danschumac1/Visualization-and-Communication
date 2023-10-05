@@ -1,0 +1,201 @@
+---
+title: "Annotations"
+author: "Ashwin Malshe"
+date: "10/3/2023"
+format:
+  html: 
+    theme: none
+---
+
+```{r}
+#| label = "setup",
+#| include = FALSE
+
+pacman::p_load(tidyverse, showtext, ggtext, jpeg, png)
+theme_set(theme_minimal())
+```
+
+```{r}
+#| echo: false
+cleanrmd::use_cleanrmd(name = "holiday")
+```
+
+We will use `economics` data set which comes bundled with `ggplot2`. Here is the variable description:
+
+A data frame with 574 rows and 6 variables:
+
+date - Month of data collection pce - personal consumption expenditures, in billions of dollars pop - total population, in thousands psavert - personal savings rate uempmed - median duration of unemployment, in weeks unemploy - number of unemployed in thousands
+
+## Text annotations
+
+*I will skip the first few plots in the class as I already showed them to you last week.*
+
+```{r}
+p1 = economics %>% 
+  mutate(year = lubridate::year(date)) %>% 
+  filter(year >= 2010) %>% 
+  group_by(year) %>% 
+  summarize(psavert_mean = mean(psavert, na.rm = TRUE),
+            .groups = "drop") %>% 
+  ggplot(aes(x = as.character(year), y = psavert_mean)) +
+  geom_col()
+
+p1
+```
+
+```{r}
+p1 +
+  geom_text(aes(label = scales::percent(psavert_mean / 100, accuracy = 0.01)))
+```
+
+```{r}
+p1 +
+  geom_text(aes(label = scales::percent(psavert_mean/100, accuracy = 0.01)),
+            vjust = 1.5, size = 4, color = "white")
+```
+
+You can set y aesthetic to a constant, which will show the labels at the same height. You may include it inside `aes()` or outside. Here I include it outside the `aes()`.
+
+```{r}
+p1 +
+  geom_label(aes(label = scales::percent(psavert_mean/100, accuracy = 0.01)), 
+            y = 2, size = 4)
+```
+
+## Adding annotations for only a few points
+
+`geom_text()` will add text to all the points in the plot. However, often we need to annotate only a few points on the plot. For this purpose, `annotate_*()` functions come in handy.
+
+```{r}
+p2 = economics %>% 
+  mutate(unemploy_per = unemploy / pop) %>% 
+  ggplot(aes(date, unemploy_per)) +
+  geom_line() +
+  scale_y_continuous(labels = scales::percent)
+
+p2
+```
+
+Annotate 2010 spike in the unemployment
+
+```{r}
+p2 +
+          # annotate does not look at your data.
+                          # left bound                  # right bound
+  annotate(geom = "rect", xmin = as.Date("2008-07-01"), xmax = as.Date("2010-07-01"),
+           # dwon bound # up bound
+           ymin = -Inf, ymax = Inf, fill = "gray30", alpha = 0.5) +
+  annotate(geom = "text", label = "Mortgage crisis",
+           # These are centering quardinates
+           x = as.Date("2010-01-01"), y = 0.02,
+           color = "red") +
+    annotate(geom = "text", label = "Reagen recession", 
+           x = as.Date("1990-01-01"), y = 0.051,
+           color = "red") 
+```
+
+## Image annotation
+
+For annotating plots with images like `geom_text` we have to update the data set with the file path to those images. It's a bit tedious and you should use it only if you really need to. The package for this is `ggimage` and the relevant geom is `geom_image()`. Read more about it here: https://yulab-smu.top/pkgdocs/ggimage.html
+
+It's far more common to use images to annotate only one point of a plot. For example, you may want to include a logo on the plot either in the background or in one corner. Here is how to do that:
+
+Download UTSA logo (stacked) from here and save it in your project directory:
+
+https://www.utsa.edu/marcomstudio/resources/logos-visual-identity/
+
+Take a note of the file extension. If it is `.png` we will use `png` packages
+
+```{r}
+ economics %>% 
+  mutate(unemploy_per = unemploy / pop) %>% 
+  ggplot(aes(date, unemploy_per)) +
+  
+  # raster means png and jpeg files. reads pixle by pixle
+  annotation_raster(readPNG("UTSA_Logo_Website_UTSA_Logo_Stacked_Center.png"),
+                    
+                    #coordinates                                        # looks better when true?
+                    xmin = -Inf, xmax = Inf, ymin = 0.015, ymax = 0.05, interpolate = T) +
+  geom_line(color = "#69be0f", size = 1) +
+  scale_y_continuous(labels = scales::percent)
+
+```
+
+```{r}
+ economics %>% 
+  mutate(unemploy_per = unemploy / pop) %>% 
+  ggplot(aes(date, unemploy_per)) +
+  annotation_raster(readPNG("UTSA_Logo_Website_UTSA_Logo_Stacked_Center.png"),
+                    xmin = as.Date("2000-01-01"), xmax = as.Date("2015-01-01"), 
+                    ymin = 0.015, ymax = 0.02, interpolate = T) +
+  geom_line(color = "#69be0f", size = 1) +
+  scale_y_continuous(labels = scales::percent)
+
+```
+
+## Annotations using `ggtext` package
+
+`ggplot2` does not have an easy way to use multiple colors, different fonts, or font faces in the annotations including titles, subtitles, and captions. For professional visualizations, it is common to have such variations. `ggtext` package solves this problem. It allows us to use a subset of HTML, CSS, and markdown with `ggplot2`.
+
+Check out the Github repo for `ggtext` for more information: https://github.com/wilkelab/ggtext
+
+Bold specific words in the title
+
+```{r}
+
+#Using Titles with markdown.
+
+p2 +
+  labs(title = "**Rise** and **fall** in the economy are cyclical") +
+  theme(plot.title = element_markdown())
+
+```
+
+We can use HTML tags easily. Here, I use "sup" tag which is short for superscript.
+
+```{r}
+p2 +
+  labs(title = "**Rise** and **fall** in the economy are cyclical",
+       subtitle = "This is a finding from UTSA<sup>TM</sup>") +
+  
+  theme(plot.title = element_markdown(),
+        plot.subtitle = element_markdown())
+```
+
+Next, let's make a more complex title using HTML, CSS, and some markdown elements
+
+In HTML, you could use "b" tag for bold and "i" tag for italics font faces. You can also use the "font-weight" CSS property inside CSS attribute "style" but it did not work in `ggtext` unfortunately. For example, instead of using a "b" tag, I could have specified `style="font-weight: bold; font-size: 14pt;"` but it did not work. This shows that `ggtext` has many limitations and it works with only a *subset* of HTML and CSS.
+
+```{r}
+p2 +            # <b is bold 
+                   # style is a css attribute                       # br break line 
+  labs(title = '<b style="font-size: 14pt;">The economy is cyclical</b><br>
+<i style="font-size: 11pt;">If it goes <span style="color: green;">**up**</span>, it is almost certain that it will come <span style="color: red;">**down**</span></i>
+') +
+  #line height makes a bigger gap between the title and the subtitle. 
+  theme(plot.title = element_markdown(lineheight = 1.9))
+```
+
+`ggtext` can be used to create text boxes. If the textbox is outside the panel, use `element_textbox()` or `element_textbox_simple()` functions. If the textbox needs to be inside the panel, use `geom_textbox()`.
+
+```{r}
+p2 +
+  labs(title = '<b style="font-size: 14pt;">The economy is cyclical</b><br>
+<i style="font-size: 11pt;">If it goes <span style="color: darkgreen;">**up**</span>, it is almost certain that it will come <span style="color: red;">**down**</span></i>
+') +
+                      # this is better than element_textbox plain
+  theme(plot.title = element_textbox_simple(lineheight = 1.2, fill = "lightsteelblue1", family =                                                # T    R    B    L
+                                            padding = margin(5.5, 5.5, 5.5, 5.5)))
+```
+
+```{r}
+#create dataframe with 1 obs. (where you want to place your label)
+text_dt = data.frame(date = as.Date("1990-01-01"), 
+                     unemploy_per = 0.051, 
+                     mylabel = '<span style = "color: red">**Reagen recession** </span>')
+
+p2 +
+  # annotations inside the panel.
+  geom_textbox(data = text_dt, aes(label = mylabel), fill = "lightblue")
+
+```

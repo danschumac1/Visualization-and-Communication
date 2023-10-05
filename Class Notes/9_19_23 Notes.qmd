@@ -1,0 +1,145 @@
+---
+title: "9_19_23 Notes"
+format: html
+editor: visual
+author: Dan Schumacher
+---
+
+# Part 1
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+#| eval = False
+
+#this is the bones of ggplot2
+
+ggplot(
+  #what data and what are your positioning
+  data = ,
+       mapping = aes()) +
+  #what kind of plot?
+  geom_*() +
+  
+  # these following parts are not required
+  # scale changes behavior of aesthetics (exmp: alter x axis to be scaled)
+  scale_*() + 
+  
+  # labels (titles, subtitles, legends, captions, axis names)
+  labs() +
+  
+  # used to plot multiple plots at once
+  facet_*() +
+  
+  # change looks (fonts background color, grid lines etc)
+  theme()
+```
+
+```{r}
+names(mpg)
+
+#applies a function to each column in this case it applies the class() function across mpg's cols.
+sapply(mpg,class)
+```
+
+```{r}
+# make an empty canvas
+ggplot()
+
+# make a blank canvas and look at you
+ggplot(data = mpg)
+
+# plots values based on ranges of x and y. Adds axis breaks.
+ggplot(data = mpg,
+       mapping = aes(x = cty,y = hwy))
+
+# add shape. we have 2 continuous variables
+ggplot(data = mpg,
+       mapping = aes(x = cty,y = hwy)) +
+  geom_point()
+
+#could do it like this
+ggplot() +
+  geom_point(data = mpg, mapping = aes(x= cty, y = hwy))
+
+#plotting 2 plots from parents
+ggplot(data = mpg, mapping = aes(cty, y = hwy)) +
+  geom_point() +
+  geom_smooth()
+
+```
+
+# Part 2
+
+```{r}
+#set theme same so looks like teachers
+theme_set(theme_minimal())
+```
+
+Can always go session -\> restart R.
+
+```{r}
+#graphing this wouldn't help much. 
+count(mpg, hwy)
+
+
+# Y by default is the count
+# histograms takes continuous data into -> discrete data -> bar graph
+# Hists are part of EDA not presentations. They can fool people.
+ggplot(data = mpg, aes(x=hwy)) +
+  #could also do binwidth
+  geom_histogram(bins = 15)
+
+#changing looks
+ggplot(data = mpg, aes(x=hwy)) +
+  geom_histogram(bins = 15, color='hotpink', fill = '#e1ad01',alpha = .3)
+
+```
+
+```{r}
+#only has x or y aesthetic
+mpg %>% 
+  ggplot(aes(y=hwy)) +
+  geom_boxplot()
+
+#factored boxplot
+mpg %>% 
+  # factor() converts continuous to discrete
+  ggplot(aes(x = factor(cyl), y = hwy)) +
+  geom_boxplot()
+
+mpg %>% 
+  filter(cyl != 5) %>% 
+  ggplot(aes(x = factor(cyl), y = hwy)) +
+  geom_boxplot()
+```
+
+```{r}
+# basic bar graphs
+mpg %>% 
+  ggplot(aes(x = class)) +
+  geom_bar()
+
+# another way to do this.
+# but lets you specify x and y
+mpg %>% 
+  group_by(class) %>% 
+  summarize(hwy_mean = mean(hwy)) %>% 
+  ggplot(aes(x = class, y = hwy_mean)) +
+  geom_col()
+
+# order the bars
+# mpg %>% 
+#   group_by(class) %>% 
+#   summarize(count = n()) %>% 
+#   ggplot(aes(x = class)) +
+#   geom_bar()
+
+# mpg %>% 
+#   group_by(class) %>% 
+#   summarize(count = n()) %>% 
+#   ggplot(aes(x = class))
+```

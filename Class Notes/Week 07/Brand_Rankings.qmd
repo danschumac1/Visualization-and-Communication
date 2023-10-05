@@ -1,0 +1,214 @@
+---
+title: "Brand Reputation Poll"
+author: "Ashwin Malshe"
+date: "2023-10-03"
+output: html_document
+---
+
+```{r}
+#| label = "setup",
+#| include = FALSE
+
+pacman::p_load(tidyverse, showtext, png, jpeg, tidytext)
+```
+
+Read the data. The dataset and the description are available here:
+https://github.com/rfordatascience/tidytuesday/tree/master/data/2022/2022-05-31
+
+
+```{r}
+poll <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-05-31/poll.csv')
+reputation <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-05-31/reputation.csv')
+
+```
+
+```{r}
+dt_22 = poll %>% 
+  select(company, industry, starts_with("2022")) %>% 
+  group_by(company) %>% 
+  filter(row_number() == 1) %>% 
+  mutate(change = 0,
+         year = 2022,
+         rank = `2022_rank`,
+         rq = `2022_rq`) %>% 
+  ungroup()
+```
+
+
+```{r}
+poll2 = rbind(poll, dt_22) %>% 
+  arrange(`2022_rank`, year)
+```
+
+
+## Top 10 and bottom 10 brands in 2022
+
+```{r}
+dt_22 %>% 
+  filter(rank <= 10) %>% 
+  ggplot(aes(rq, reorder(company, rq))) +
+  geom_col() +
+  geom_label(aes(label = scales::number(rq, 0.1), x = rq - 5)) +
+  labs(x = "Reputation", y = NULL)
+```
+
+```{r}
+sapply(dt_22, class)
+```
+
+```{r}
+count(dt_22, industry, sort = T)
+```
+
+
+```{r}
+dplyr::count(dt_22, industry, sort = T)
+```
+
+```{r}
+dt_22 %>% 
+  filter(industry == "Retail")
+```
+
+```{r}
+dt_22 %>% 
+  filter(industry == "Groceries")
+```
+
+```{r}
+dt_22 %>% 
+  filter(industry == "Financial Services")
+```
+
+```{r}
+dt_22 %>% 
+  filter(industry == "Insurance")
+```
+
+
+```{r}
+dt_22 = dt_22 %>% 
+  mutate(industry2 = case_when(
+    company == "Progressive Corporation" ~ "Financial Services",
+    company %in% c("Trader Joe's", "HEB Grocery") ~ "Groceries",
+    TRUE ~ industry))
+```
+
+```{r}
+count(dt_22, industry2, sort = TRUE)
+```
+
+```{r}
+dt_22 %>% 
+  select(company, industry, industry2) %>% 
+  filter(company %in% c("Trader Joe's", "HEB Grocery", "Progressive Corporation"))
+```
+
+
+```{r}
+names(reputation)
+```
+
+```{r}
+head(reputation, 10)
+```
+
+I will focus on the following industries because the number of observations is >= 5.
+
+Retail	20			
+Tech	15			
+Food & Beverage	11			
+Financial Services	9			
+Automotive	7			
+Groceries	5	
+
+
+```{r}
+reputation  = reputation %>% 
+    mutate(industry2 = case_when(
+    company == "Progressive Corporation" ~ "Financial Services",
+    company %in% c("Trader Joe's", "HEB Grocery") ~ "Groceries",
+    TRUE ~ industry))
+```
+
+
+```{r}
+rep_summary = reputation %>% 
+  filter(industry2 %in% c("Retail", "Tech", "Food & Beverage", "Financial Services", "Automotive", "Groceries")) %>% 
+  group_by(industry2, name) %>% 
+  summarize(mean_score = mean(score), .groups = "drop")
+```
+
+
+```{r}
+rep_summary
+```
+
+```{r}
+rep_summary %>% 
+  ggplot(aes(x = name, y = mean_score)) +
+  geom_col() +
+  geom_text(aes(label = scales::number(mean_score, 0.1), y = mean_score - 7), color = "white", size = 3) +
+  facet_wrap(~ industry2) +
+  coord_flip() +
+  theme_minimal()
+```
+
+```{r}
+rep_summary %>% 
+  ggplot(aes(x = industry2, y = mean_score)) +
+  geom_col() +
+  geom_text(aes(label = scales::number(mean_score, 0.1), y = mean_score - 7), color = "white", size = 3) +
+  facet_wrap(~ name) +
+  coord_flip() +
+  theme_minimal()
+```
+
+```{r}
+rep_summary %>% 
+  mutate(groc_col = ifelse(industry2 == "Groceries", "1", "0")) %>% 
+  ggplot(aes(x = industry2, y = mean_score)) +
+  geom_point(aes(color = groc_col), show.legend = FALSE) +
+  scale_color_manual(values = c("gray60", "#c61c5a")) +
+  facet_wrap(~ name) +
+  coord_flip() +
+  scale_y_continuous(limits = c(65, 85)) +
+  labs(x = NULL, y = NULL, 
+       title = "Groceries outperform all the industries on 7 reputation components") +
+  theme_minimal()
+```
+
+
+
+
+
+```{r}
+rep_summary %>% 
+  mutate(groc_col = ifelse(industry2 == "Groceries", "1", "0")) %>% 
+  mutate(name = as.factor(name),
+         industry2 = reorder_within(industry2, mean_score, name)) %>% 
+  ggplot(aes(x = industry2, y = mean_score)) +
+  geom_point(aes(color = groc_col), show.legend = F) +
+  coord_flip() +
+  facet_wrap(~ name, scales = "free") +
+  scale_x_reordered() +
+  scale_y_continuous(limits = c(65, 85)) +
+  scale_color_manual(values = c("gray60", "#c61c5a")) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal()
+```
+
+```{r}
+rep_summary %>% 
+  mutate(name = as.factor(name),
+         industry2 = reorder_within(industry2, mean_score, name)) %>% 
+  ggplot(aes(x = industry2, y = mean_score)) +
+  geom_col(aes(fill = name), show.legend = F) +
+  geom_text(aes(label = scales::number(mean_score, 0.1), y = mean_score - 20), color = "white", size = 3) +
+  coord_flip() +
+  facet_wrap(~ name, scales = "free") +
+  scale_x_reordered() +
+  scale_y_continuous(limits = c(0, 85)) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal()
+```
